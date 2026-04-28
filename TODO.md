@@ -4,7 +4,7 @@
 - [x] Fix `dashboard.blade.php` - missing closing divs
 - [x] Fix `location_weather.blade.php` - missing closing divs
 - [x] Fix `locations/index.blade.php` - missing closing div
-- [ ] Verify fixes
-- [ ] Git commit all changes
-- [ ] Push to remote repository
+- [x] Verify fixes
+- [x] Git commit all changes
+- [x] Push to remote repository
 
