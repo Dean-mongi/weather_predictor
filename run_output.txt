@@ -1,0 +1,36 @@
+Generating synthetic weather data...
+Dataset shape: (1000, 7)
+
+First 5 rows of the dataset:
+    humidity     pressure  wind_speed  ...  cloud_cover  month  temperature
+0  49.963210   989.256646    7.851171  ...    57.199588      3    60.476845
+1  96.057145  1007.095047    7.409364  ...    80.543233      8    29.579065
+2  78.559515  1023.647292   27.187637  ...    76.016093      7    42.028832
+3  67.892679  1016.611244    7.486386  ...    15.389990      3    57.406955
+4  32.481491  1020.328057    8.158492  ...    14.924947      6    51.778894
+
+[5 rows x 7 columns]
+
+Training the weather prediction model...
+==================================================
+Weather Prediction Model - Performance Metrics
+==================================================
+Mean Absolute Error (MAE): 2.95 C
+Root Mean Squared Error (RMSE): 3.63 C
+R2 Score: 0.8310
+==================================================
+
+Feature Importance:
+      feature  importance
+        month    0.568819
+precipitation    0.138993
+   wind_speed    0.128289
+     humidity    0.087478
+  cloud_cover    0.046785
+     pressure    0.029636
+
+Plot saved as 'weather_prediction_results.png'
+
+Sample Prediction:
+Input: {'humidity': 65, 'pressure': 1013, 'wind_speed': 10, 'precipitation': 5, 'cloud_cover': 40, 'month': 6}
+Predicted Temperature: 49.49 C
