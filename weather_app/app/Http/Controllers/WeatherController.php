@@ -5,12 +5,18 @@ namespace App\Http\Controllers;
 use App\Models\Location;
 use App\Models\WeatherData;
 use Illuminate\Http\Request;
+use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
 class WeatherController extends Controller
 {
     private string $pythonApiUrl = 'http://127.0.0.1:5000';
+
+    public function __construct()
+    {
+        $this->pythonApiUrl = (string) config('services.weather_api.url', 'http://127.0.0.1:5000');
+    }
 
     public function dashboard()
     {
@@ -93,7 +99,7 @@ class WeatherController extends Controller
         ]);
 
         try {
-            $response = Http::post("{$this->pythonApiUrl}/predict", [
+            $response = Http::timeout(15)->post("{$this->pythonApiUrl}/predict", [
                 'humidity' => (float) $validated['humidity'],
                 'pressure' => (float) $validated['pressure'],
                 'wind_speed' => (float) $validated['wind_speed'],
@@ -123,6 +129,9 @@ class WeatherController extends Controller
             }
 
             return redirect()->back()->with('error', 'Failed to get prediction from API');
+        } catch (ConnectionException $e) {
+            Log::error('Prediction connection error: ' . $e->getMessage());
+            return redirect()->back()->with('error', $this->pythonApiUnavailableMessage());
         } catch (\Exception $e) {
             Log::error('Prediction error: ' . $e->getMessage());
             return redirect()->back()->with('error', 'API connection failed: ' . $e->getMessage());
@@ -132,7 +141,7 @@ class WeatherController extends Controller
     public function fetchLiveWeather(Location $location)
     {
         try {
-            $response = Http::get("{$this->pythonApiUrl}/fetch-weather", [
+            $response = Http::timeout(20)->get("{$this->pythonApiUrl}/fetch-weather", [
                 'location' => $location->name,
             ]);
 
@@ -156,9 +165,17 @@ class WeatherController extends Controller
             }
 
             return redirect()->back()->with('error', 'Failed to fetch live weather');
+        } catch (ConnectionException $e) {
+            Log::error('Fetch weather connection error: ' . $e->getMessage());
+            return redirect()->back()->with('error', $this->pythonApiUnavailableMessage());
         } catch (\Exception $e) {
             Log::error('Fetch weather error: ' . $e->getMessage());
-            return redirect()->back()->with('error', 'API connection failed');
+            return redirect()->back()->with('error', 'API connection failed: ' . $e->getMessage());
         }
+    }
+
+    private function pythonApiUnavailableMessage(): string
+    {
+        return "Weather API is not running. Start the Python service at {$this->pythonApiUrl} and try again.";
     }
 }

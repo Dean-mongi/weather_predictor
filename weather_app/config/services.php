@@ -35,4 +35,8 @@ return [
         ],
     ],
 
+    'weather_api' => [
+        'url' => env('WEATHER_API_URL', 'http://127.0.0.1:5000'),
+    ],
+
 ];

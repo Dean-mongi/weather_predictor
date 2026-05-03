@@ -17,10 +17,11 @@ from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 app = Flask(__name__)
 CORS(app)
 
-MODEL_PATH = os.path.join(os.path.dirname(__file__), 'weather_model.pkl')
+MODEL_PATH = os.path.join(os.path.dirname(__file__), 'weather_model_runtime.pkl')
+model_cache = None
 
 
-def generate_synthetic_weather_data(n_samples=2000, random_state=42):
+def generate_synthetic_weather_data(n_samples=1200, random_state=42):
     """Generate synthetic weather data for training."""
     np.random.seed(random_state)
     humidity = np.random.uniform(20, 100, n_samples)
@@ -63,7 +64,7 @@ def train_and_save_model():
         X, y, test_size=0.2, random_state=42
     )
 
-    model = RandomForestRegressor(n_estimators=150, random_state=42, n_jobs=-1)
+    model = RandomForestRegressor(n_estimators=60, random_state=42, n_jobs=1)
     model.fit(X_train, y_train)
 
     y_pred = model.predict(X_test)
@@ -94,10 +95,17 @@ def load_model():
 
 def get_or_create_model():
     """Get existing model or train a new one."""
+    global model_cache
+
+    if model_cache is not None:
+        return model_cache
+
     model = load_model()
     if model is None:
         train_and_save_model()
         model = load_model()
+
+    model_cache = model
     return model
 
 
@@ -213,5 +221,5 @@ if __name__ == '__main__':
     print("Starting Weather Prediction API...")
     get_or_create_model()
     print("Model loaded. API ready.")
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    app.run(host='127.0.0.1', port=5000, debug=False)
 
