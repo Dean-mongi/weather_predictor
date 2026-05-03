@@ -14,14 +14,46 @@ class WeatherController extends Controller
 
     public function dashboard()
     {
-        $locations = Location::with('weatherData')->get();
+        $locations = Location::with('weatherData')
+            ->withCount('weatherData')
+            ->get();
+
         $recentPredictions = WeatherData::with('location')
             ->where('is_prediction', true)
             ->latest('recorded_at')
             ->take(10)
             ->get();
 
-        return view('dashboard', compact('locations', 'recentPredictions'));
+        $predictionTrend = $recentPredictions
+            ->sortBy('recorded_at')
+            ->values()
+            ->map(fn (WeatherData $prediction) => [
+                'label' => $prediction->recorded_at->format('M d, H:i'),
+                'location' => $prediction->location?->name ?? 'Unknown',
+                'temperature' => (float) $prediction->temperature,
+                'humidity' => (float) $prediction->humidity,
+                'pressure' => (float) $prediction->pressure,
+                'wind_speed' => (float) $prediction->wind_speed,
+                'precipitation' => (float) $prediction->precipitation,
+                'cloud_cover' => (float) $prediction->cloud_cover,
+            ]);
+
+        $locationSummary = $locations->map(function (Location $location) {
+            $latestWeather = $location->latestWeather();
+
+            return [
+                'name' => $location->name,
+                'records' => $location->weather_data_count,
+                'temperature' => $latestWeather ? (float) $latestWeather->temperature : null,
+            ];
+        });
+
+        return view('dashboard', compact(
+            'locations',
+            'recentPredictions',
+            'predictionTrend',
+            'locationSummary'
+        ));
     }
 
     public function locationWeather(Location $location)
@@ -31,7 +63,21 @@ class WeatherController extends Controller
             ->take(30)
             ->get();
 
-        return view('location_weather', compact('location', 'weatherData'));
+        $historyChart = $weatherData
+            ->sortBy('recorded_at')
+            ->values()
+            ->map(fn (WeatherData $data) => [
+                'label' => $data->recorded_at->format('M d, H:i'),
+                'temperature' => (float) $data->temperature,
+                'humidity' => (float) $data->humidity,
+                'pressure' => (float) $data->pressure,
+                'wind_speed' => (float) $data->wind_speed,
+                'precipitation' => (float) $data->precipitation,
+                'cloud_cover' => (float) $data->cloud_cover,
+                'type' => $data->is_prediction ? 'Prediction' : 'Live',
+            ]);
+
+        return view('location_weather', compact('location', 'weatherData', 'historyChart'));
     }
 
     public function predict(Request $request)
