@@ -6,6 +6,9 @@ Flask-based API that exposes the Random Forest weather prediction model.
 import os
 import json
 import pickle
+from datetime import datetime
+from urllib.parse import urlencode
+from urllib.request import urlopen
 import numpy as np
 import pandas as pd
 from flask import Flask, request, jsonify
@@ -19,6 +22,7 @@ CORS(app)
 
 MODEL_PATH = os.path.join(os.path.dirname(__file__), 'weather_model_runtime.pkl')
 model_cache = None
+OPEN_METEO_TIMEOUT = 12
 
 
 def generate_synthetic_weather_data(n_samples=1200, random_state=42):
@@ -126,6 +130,96 @@ def simulate_weather_for_location(location, month=None):
     }
 
 
+def fetch_json(url):
+    """Fetch JSON from a public weather endpoint."""
+    with urlopen(url, timeout=OPEN_METEO_TIMEOUT) as response:
+        return json.loads(response.read().decode('utf-8'))
+
+
+def geocode_location(location, country=None):
+    """Resolve a city name to latitude and longitude using Open-Meteo."""
+    query = location if not country else f'{location}, {country}'
+    params = urlencode({
+        'name': query,
+        'count': 1,
+        'language': 'en',
+        'format': 'json',
+    })
+    data = fetch_json(f'https://geocoding-api.open-meteo.com/v1/search?{params}')
+    results = data.get('results') or []
+
+    if not results:
+        return None
+
+    match = results[0]
+    return {
+        'name': match.get('name', location),
+        'country': match.get('country', country),
+        'latitude': float(match['latitude']),
+        'longitude': float(match['longitude']),
+        'timezone': match.get('timezone', 'auto'),
+    }
+
+
+def fetch_current_weather(location, country=None, latitude=None, longitude=None):
+    """Fetch current weather observations from Open-Meteo."""
+    resolved = None
+
+    if latitude is not None and longitude is not None:
+        resolved = {
+            'name': location,
+            'country': country,
+            'latitude': float(latitude),
+            'longitude': float(longitude),
+            'timezone': 'auto',
+        }
+    else:
+        resolved = geocode_location(location, country)
+
+    if not resolved:
+        raise ValueError(f'Could not find coordinates for "{location}".')
+
+    params = urlencode({
+        'latitude': resolved['latitude'],
+        'longitude': resolved['longitude'],
+        'current': ','.join([
+            'temperature_2m',
+            'relative_humidity_2m',
+            'pressure_msl',
+            'wind_speed_10m',
+            'precipitation',
+            'cloud_cover',
+            'weather_code',
+        ]),
+        'timezone': 'auto',
+    })
+    data = fetch_json(f'https://api.open-meteo.com/v1/forecast?{params}')
+    current = data.get('current') or {}
+
+    if not current:
+        raise ValueError('Open-Meteo did not return current weather data.')
+
+    observed_at = current.get('time')
+    month = datetime.fromisoformat(observed_at).month if observed_at else pd.Timestamp.now().month
+
+    return {
+        'location': resolved['name'],
+        'country': resolved['country'],
+        'latitude': resolved['latitude'],
+        'longitude': resolved['longitude'],
+        'temperature': float(current['temperature_2m']),
+        'humidity': float(current['relative_humidity_2m']),
+        'pressure': float(current['pressure_msl']),
+        'wind_speed': float(current['wind_speed_10m']),
+        'precipitation': float(current['precipitation']),
+        'cloud_cover': float(current['cloud_cover']),
+        'weather_code': int(current.get('weather_code', 0)),
+        'month': int(month),
+        'observed_at': observed_at,
+        'source': 'Open-Meteo',
+    }
+
+
 @app.route('/')
 def index():
     return jsonify({
@@ -133,7 +227,7 @@ def index():
         'version': '1.0.0',
         'endpoints': {
             'predict': 'POST /predict - Predict temperature from weather features',
-            'fetch': 'GET /fetch-weather?location=<city> - Fetch simulated weather for location',
+            'fetch': 'GET /fetch-weather?location=<city> - Fetch current Open-Meteo weather for location',
             'train': 'POST /train - Retrain the model',
             'health': 'GET /health - API health check'
         }
@@ -184,24 +278,32 @@ def predict():
 @app.route('/fetch-weather', methods=['GET'])
 def fetch_weather():
     location = request.args.get('location', 'Unknown')
-    month = request.args.get('month', type=int)
+    country = request.args.get('country')
+    latitude = request.args.get('latitude', type=float)
+    longitude = request.args.get('longitude', type=float)
 
-    weather = simulate_weather_for_location(location, month)
+    try:
+        weather = fetch_current_weather(location, country, latitude, longitude)
 
-    model = get_or_create_model()
-    input_df = pd.DataFrame([{
-        'humidity': weather['humidity'],
-        'pressure': weather['pressure'],
-        'wind_speed': weather['wind_speed'],
-        'precipitation': weather['precipitation'],
-        'cloud_cover': weather['cloud_cover'],
-        'month': weather['month']
-    }])
+        model = get_or_create_model()
+        input_df = pd.DataFrame([{
+            'humidity': weather['humidity'],
+            'pressure': weather['pressure'],
+            'wind_speed': weather['wind_speed'],
+            'precipitation': weather['precipitation'],
+            'cloud_cover': weather['cloud_cover'],
+            'month': weather['month']
+        }])
 
-    prediction = model.predict(input_df)[0]
-    weather['predicted_temperature'] = round(float(prediction), 2)
+        prediction = model.predict(input_df)[0]
+        weather['predicted_temperature'] = round(float(prediction), 2)
 
-    return jsonify(weather)
+        return jsonify(weather)
+    except Exception as e:
+        return jsonify({
+            'error': str(e),
+            'source': 'Open-Meteo'
+        }), 502
 
 
 @app.route('/train', methods=['POST'])

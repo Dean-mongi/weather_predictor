@@ -180,6 +180,49 @@
             margin-top: 1.3rem;
         }
 
+        .dashboard-hero-media {
+            display: grid;
+            gap: 0.8rem;
+            grid-template-columns: minmax(0, 1.25fr) minmax(120px, 0.75fr);
+            margin-top: 1.5rem;
+            max-width: 660px;
+        }
+
+        .weather-photo {
+            background-position: center;
+            background-size: cover;
+            border: 1px solid rgba(255, 255, 255, 0.24);
+            border-radius: 16px;
+            min-height: 118px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .weather-photo::after {
+            background: linear-gradient(180deg, transparent, rgba(8, 31, 38, 0.28));
+            content: "";
+            inset: 0;
+            position: absolute;
+        }
+
+        .weather-photo-main {
+            background-image: url("https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1200&q=80");
+            min-height: 248px;
+        }
+
+        .weather-photo-stack {
+            display: grid;
+            gap: 0.8rem;
+        }
+
+        .weather-photo-rain {
+            background-image: url("https://images.unsplash.com/photo-1519692933481-e162a57d6721?auto=format&fit=crop&w=800&q=80");
+        }
+
+        .weather-photo-sun {
+            background-image: url("https://images.unsplash.com/photo-1469474968028-56623f02e42e?auto=format&fit=crop&w=800&q=80");
+        }
+
         .hero-meta {
             display: grid;
             gap: 1rem;
@@ -607,6 +650,18 @@
 
             .hero-meta {
                 grid-template-columns: 1fr;
+            }
+
+            .dashboard-hero-media {
+                grid-template-columns: 1fr;
+            }
+
+            .weather-photo-main {
+                min-height: 190px;
+            }
+
+            .weather-photo-stack {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
             }
 
             .container {

@@ -15,11 +15,18 @@
         <div class="eyebrow">Forecast Command Center</div>
         <h1 class="page-title">Weather prediction at a glance</h1>
         <p class="page-subtitle">
-            Track recent model outputs, compare locations, and keep your manual prediction workflow close to the data that matters.
+            Track current observations, compare locations, and keep your prediction workflow close to the data that matters.
         </p>
         <div class="hero-actions">
             <a href="{{ route('locations.index') }}" class="btn btn-secondary">Manage Locations</a>
             <a href="#manual-prediction" class="btn btn-primary">Create Prediction</a>
+        </div>
+        <div class="dashboard-hero-media" aria-label="Satellite-inspired weather view">
+            <div class="weather-photo weather-photo-main"></div>
+            <div class="weather-photo-stack">
+                <div class="weather-photo weather-photo-rain"></div>
+                <div class="weather-photo weather-photo-sun"></div>
+            </div>
         </div>
     </div>
 
@@ -32,7 +39,7 @@
         <div class="hero-stat">
             <span>Warmest Spot</span>
             <strong>{{ $warmestLocation ? $warmestLocation['name'] : 'No data' }}</strong>
-            <small>{{ $warmestLocation ? number_format($warmestLocation['temperature'], 1) . 'C latest reading' : 'Add data to compare locations' }}</small>
+            <small>{{ $warmestLocation ? number_format($warmestLocation['temperature'], 1) . 'C latest reading' : 'Fetch current weather to compare locations' }}</small>
         </div>
         <div class="hero-stat">
             <span>Prediction Average</span>
@@ -51,7 +58,7 @@
     <div class="summary-tile">
         <span>Total Locations</span>
         <strong>{{ $locations->count() }}</strong>
-        <p>Every tracked city available for forecasts and live fetches.</p>
+        <p>Every tracked city available for forecasts and current weather fetches.</p>
     </div>
     <div class="summary-tile">
         <span>Recent Predictions</span>
@@ -145,7 +152,7 @@
                         <td>
                             <div class="stack">
                                 <strong>{{ $location->name }}</strong>
-                                <span>View history and fetch live weather</span>
+                                <span>View history and fetch current weather</span>
                             </div>
                         </td>
                         <td>{{ $location->country ?: 'Not set' }}</td>

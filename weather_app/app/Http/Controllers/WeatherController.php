@@ -143,6 +143,9 @@ class WeatherController extends Controller
         try {
             $response = Http::timeout(20)->get("{$this->pythonApiUrl}/fetch-weather", [
                 'location' => $location->name,
+                'country' => $location->country,
+                'latitude' => $location->latitude,
+                'longitude' => $location->longitude,
             ]);
 
             if ($response->successful()) {
@@ -150,21 +153,26 @@ class WeatherController extends Controller
 
                 WeatherData::create([
                     'location_id' => $location->id,
-                    'temperature' => $data['predicted_temperature'],
+                    'temperature' => $data['temperature'],
                     'humidity' => $data['humidity'],
                     'pressure' => $data['pressure'],
                     'wind_speed' => $data['wind_speed'],
                     'precipitation' => $data['precipitation'],
                     'cloud_cover' => $data['cloud_cover'],
                     'month' => $data['month'],
-                    'is_prediction' => true,
+                    'is_prediction' => false,
                     'recorded_at' => now(),
                 ]);
 
-                return redirect()->back()->with('success', 'Live weather fetched and predicted successfully!');
+                $temperature = number_format((float) $data['temperature'], 1);
+                $source = $data['source'] ?? 'weather API';
+
+                return redirect()->back()->with('success', "Current weather fetched from {$source}: {$temperature}C.");
             }
 
-            return redirect()->back()->with('error', 'Failed to fetch live weather');
+            $message = $response->json('error') ?: 'Failed to fetch current weather';
+
+            return redirect()->back()->with('error', $message);
         } catch (ConnectionException $e) {
             Log::error('Fetch weather connection error: ' . $e->getMessage());
             return redirect()->back()->with('error', $this->pythonApiUnavailableMessage());
