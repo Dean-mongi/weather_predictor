@@ -205,10 +205,23 @@
             position: absolute;
         }
 
-        .weather-photo-main {
+.weather-photo-main {
             background-image: url("https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1200&q=80");
             min-height: 248px;
+            display: flex;
         }
+
+        .dashboard-reference {
+            position: absolute;
+            inset: 10px;
+            border-radius: 14px;
+            background: url("/images/dashboard-reference.jpeg") center / cover no-repeat;
+            opacity: 0.22;
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            pointer-events: none;
+            mix-blend-mode: screen;
+        }
+
 
         .weather-photo-stack {
             display: grid;

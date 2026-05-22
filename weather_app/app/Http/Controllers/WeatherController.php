@@ -141,12 +141,22 @@ class WeatherController extends Controller
     public function fetchLiveWeather(Location $location)
     {
         try {
-            $response = Http::timeout(20)->get("{$this->pythonApiUrl}/fetch-weather", [
+            // Prefer coordinates when both are available to ensure precise matching.
+            $hasLat = $location->latitude !== null && $location->latitude !== '';
+            $hasLon = $location->longitude !== null && $location->longitude !== '';
+
+            $query = [
                 'location' => $location->name,
                 'country' => $location->country,
-                'latitude' => $location->latitude,
-                'longitude' => $location->longitude,
-            ]);
+            ];
+
+            if ($hasLat && $hasLon) {
+                $query['latitude'] = (float) $location->latitude;
+                $query['longitude'] = (float) $location->longitude;
+            }
+
+            $response = Http::timeout(20)->get("{$this->pythonApiUrl}/fetch-weather", $query);
+
 
             if ($response->successful()) {
                 $data = $response->json();
@@ -167,7 +177,11 @@ class WeatherController extends Controller
                 $temperature = number_format((float) $data['temperature'], 1);
                 $source = $data['source'] ?? 'weather API';
 
-                return redirect()->back()->with('success', "Current weather fetched from {$source}: {$temperature}C.");
+                $resolvedLat = $data['latitude'] ?? $location->latitude;
+                $resolvedLon = $data['longitude'] ?? $location->longitude;
+
+                return redirect()->back()->with('success', "Current weather fetched from {$source}: {$temperature}C (lat {$resolvedLat}, lon {$resolvedLon}).");
+
             }
 
             $message = $response->json('error') ?: 'Failed to fetch current weather';

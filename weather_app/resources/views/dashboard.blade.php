@@ -22,7 +22,10 @@
             <a href="#manual-prediction" class="btn btn-primary">Create Prediction</a>
         </div>
         <div class="dashboard-hero-media" aria-label="Satellite-inspired weather view">
-            <div class="weather-photo weather-photo-main"></div>
+            <div class="weather-photo weather-photo-main">
+                <div class="dashboard-reference" aria-hidden="true"></div>
+            </div>
+
             <div class="weather-photo-stack">
                 <div class="weather-photo weather-photo-rain"></div>
                 <div class="weather-photo weather-photo-sun"></div>
@@ -32,12 +35,19 @@
 
     <div class="hero-meta">
         <div class="hero-stat">
+            <span>Precision</span>
+            <strong>{{ $locations->filter(fn($l)=>$l->latitude!==null && $l->longitude!==null)->count() }} mapped</strong>
+            <small>Use Fetch Live to resolve accurate coordinates</small>
+        </div>
+
+        <div class="hero-stat">
             <span>Coverage</span>
             <strong>{{ $locations->count() }} locations</strong>
             <small>{{ $totalRecords }} weather records saved across the system</small>
         </div>
         <div class="hero-stat">
             <span>Warmest Spot</span>
+
             <strong>{{ $warmestLocation ? $warmestLocation['name'] : 'No data' }}</strong>
             <small>{{ $warmestLocation ? number_format($warmestLocation['temperature'], 1) . 'C latest reading' : 'Fetch current weather to compare locations' }}</small>
         </div>

@@ -29,6 +29,15 @@
             <strong>{{ $location->country ?: 'Not set' }}</strong>
             <small>{{ $location->latitude !== null ? $location->latitude . ', ' . $location->longitude : 'Coordinates not available' }}</small>
         </div>
+
+        <div class="hero-stat">
+            <span>Resolved Coordinates</span>
+            <strong>
+                {{ $latest && ($latest->latitude ?? null) !== null ? number_format((float) $latest->latitude, 4) . ', ' . number_format((float) $latest->longitude, 4) : 'Fetch Live to resolve' }}
+            </strong>
+            <small>{{ $latest ? ($latest->source ?? 'Open-Meteo') : '—' }}</small>
+        </div>
+
         <div class="hero-stat">
             <span>Latest Reading</span>
             <strong>{{ $latest ? number_format($latest->temperature, 1) . 'C' : 'No data' }}</strong>
