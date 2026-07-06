@@ -34,6 +34,12 @@
     </div>
 
     <div class="hero-meta">
+        <div class="hero-stat api-status {{ $apiStatus['online'] ? 'is-online' : 'is-offline' }}">
+            <span>Prediction API</span>
+            <strong>{{ $apiStatus['label'] }}</strong>
+            <small>{{ $apiStatus['detail'] }}</small>
+        </div>
+
         <div class="hero-stat">
             <span>Precision</span>
             <strong>{{ $locations->filter(fn($l)=>$l->latitude!==null && $l->longitude!==null)->count() }} mapped</strong>
@@ -291,12 +297,12 @@
     const locationSummary = @json($locationSummary);
 
     const chartColors = {
-        temperature: '#d45a3d',
-        humidity: '#1976a2',
-        wind: '#1b8f6a',
-        cloud: '#f29f58',
-        grid: '#dfeaed',
-        text: '#48626d'
+        temperature: '#ff8a65',
+        humidity: '#49b6c2',
+        wind: '#40c58d',
+        cloud: '#f2a65a',
+        grid: 'rgba(255, 255, 255, 0.08)',
+        text: '#d9e5e8'
     };
 
     Chart.defaults.color = chartColors.text;

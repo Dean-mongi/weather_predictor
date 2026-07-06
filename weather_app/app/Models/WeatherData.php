@@ -15,18 +15,24 @@ class WeatherData extends Model
     protected $fillable = [
         'location_id',
         'temperature',
+        'predicted_temperature',
         'humidity',
         'pressure',
         'wind_speed',
         'precipitation',
         'cloud_cover',
         'month',
+        'latitude',
+        'longitude',
+        'source',
+        'observed_at',
         'is_prediction',
         'recorded_at'
     ];
 
     protected $casts = [
         'recorded_at' => 'datetime',
+        'observed_at' => 'datetime',
         'is_prediction' => 'boolean',
     ];
 

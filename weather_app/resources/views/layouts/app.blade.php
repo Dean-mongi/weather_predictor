@@ -6,24 +6,24 @@
     <title>@yield('title', 'Weather Predictor')</title>
     <style>
         :root {
-            --bg: #eef4f7;
-            --bg-accent: #dce9ef;
-            --surface: rgba(255, 255, 255, 0.9);
-            --surface-strong: #ffffff;
-            --surface-muted: #f6fafb;
-            --border: #d7e5ea;
-            --border-strong: #b7ccd6;
-            --text: #18313a;
-            --text-muted: #58707b;
-            --heading: #10242c;
-            --primary: #0f7c82;
-            --primary-dark: #0b5960;
-            --secondary: #f2994a;
-            --success: #15936f;
-            --danger: #d1495b;
-            --shadow: 0 18px 40px rgba(15, 39, 48, 0.08);
-            --radius: 18px;
-            --radius-sm: 10px;
+            --bg: #111518;
+            --bg-accent: #20282c;
+            --surface: rgba(25, 31, 35, 0.92);
+            --surface-strong: #20272c;
+            --surface-muted: #151a1e;
+            --border: rgba(255, 255, 255, 0.08);
+            --border-strong: rgba(255, 255, 255, 0.16);
+            --text: #e7eef0;
+            --text-muted: #9baaae;
+            --heading: #f8fbfc;
+            --primary: #49b6c2;
+            --primary-dark: #1d7f8b;
+            --secondary: #f2a65a;
+            --success: #40c58d;
+            --danger: #ff6b7a;
+            --shadow: 0 22px 70px rgba(0, 0, 0, 0.28);
+            --radius: 8px;
+            --radius-sm: 8px;
             --max-width: 1240px;
         }
 
@@ -35,9 +35,8 @@
 
         body {
             background:
-                radial-gradient(circle at top left, rgba(15, 124, 130, 0.18), transparent 28%),
-                radial-gradient(circle at top right, rgba(242, 153, 74, 0.12), transparent 26%),
-                linear-gradient(180deg, #f6fbfc 0%, var(--bg) 42%, #edf3f6 100%);
+                linear-gradient(135deg, rgba(73, 182, 194, 0.12) 0 1px, transparent 1px 28px),
+                linear-gradient(180deg, #22272b 0%, var(--bg) 48%, #0d1013 100%);
             color: var(--text);
             font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
             line-height: 1.5;
@@ -56,8 +55,8 @@
 
         .navbar {
             backdrop-filter: blur(18px);
-            background: rgba(9, 32, 38, 0.86);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            background: rgba(14, 17, 19, 0.88);
+            border-bottom: 1px solid var(--border);
             color: #f5fbfc;
             position: sticky;
             top: 0;
@@ -71,7 +70,7 @@
             justify-content: space-between;
             margin: 0 auto;
             max-width: var(--max-width);
-            padding: 1rem 1.25rem;
+            padding: 0.85rem 1.25rem;
         }
 
         .brand {
@@ -99,7 +98,7 @@
 
         .nav-links a {
             border: 1px solid transparent;
-            border-radius: 999px;
+            border-radius: var(--radius-sm);
             color: rgba(245, 251, 252, 0.88);
             padding: 0.58rem 0.9rem;
             transition: 0.2s ease;
@@ -115,32 +114,32 @@
         .container {
             margin: 0 auto;
             max-width: var(--max-width);
-            padding: 2rem 1.25rem 3rem;
+            padding: 1.3rem 1.25rem 3rem;
         }
 
         .page-header {
             align-items: end;
             display: grid;
             gap: 1rem;
-            grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
+            grid-template-columns: minmax(0, 1.35fr) minmax(320px, 0.9fr);
             margin-bottom: 1.5rem;
         }
 
         .hero-panel {
             background:
-                linear-gradient(135deg, rgba(15, 124, 130, 0.94), rgba(11, 89, 96, 0.88)),
-                linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0));
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 24px;
+                linear-gradient(135deg, rgba(30, 42, 47, 0.96), rgba(13, 18, 21, 0.94)),
+                linear-gradient(90deg, rgba(73, 182, 194, 0.18), rgba(242, 166, 90, 0.12));
+            border: 1px solid var(--border-strong);
+            border-radius: var(--radius);
             box-shadow: var(--shadow);
             color: #f8feff;
             overflow: hidden;
-            padding: 1.8rem;
+            padding: clamp(1rem, 2.4vw, 1.6rem);
             position: relative;
         }
 
         .hero-panel::after {
-            background: radial-gradient(circle at top right, rgba(255, 255, 255, 0.22), transparent 42%);
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.14), transparent 46%);
             content: "";
             inset: 0;
             pointer-events: none;
@@ -153,7 +152,7 @@
         }
 
         .eyebrow {
-            color: rgba(248, 254, 255, 0.82);
+            color: var(--secondary);
             font-size: 0.8rem;
             letter-spacing: 0.08em;
             margin-bottom: 0.7rem;
@@ -162,8 +161,8 @@
 
         .page-title {
             color: #ffffff;
-            font-size: clamp(2rem, 4vw, 3rem);
-            line-height: 1.05;
+            font-size: clamp(1.9rem, 3.2vw, 2.8rem);
+            line-height: 1.08;
             margin-bottom: 0.75rem;
         }
 
@@ -191,8 +190,8 @@
         .weather-photo {
             background-position: center;
             background-size: cover;
-            border: 1px solid rgba(255, 255, 255, 0.24);
-            border-radius: 16px;
+            border: 1px solid var(--border-strong);
+            border-radius: var(--radius);
             min-height: 118px;
             overflow: hidden;
             position: relative;
@@ -205,7 +204,7 @@
             position: absolute;
         }
 
-.weather-photo-main {
+        .weather-photo-main {
             background-image: url("https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1200&q=80");
             min-height: 248px;
             display: flex;
@@ -214,7 +213,7 @@
         .dashboard-reference {
             position: absolute;
             inset: 10px;
-            border-radius: 14px;
+            border-radius: var(--radius);
             background: url("/images/dashboard-reference.jpeg") center / cover no-repeat;
             opacity: 0.22;
             border: 1px solid rgba(255, 255, 255, 0.18);
@@ -243,11 +242,12 @@
         }
 
         .hero-stat {
-            background: rgba(255, 255, 255, 0.72);
-            border: 1px solid rgba(255, 255, 255, 0.56);
-            border-radius: 20px;
+            background: linear-gradient(180deg, rgba(35, 43, 48, 0.94), rgba(23, 28, 32, 0.94));
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
             box-shadow: var(--shadow);
             padding: 1rem 1.1rem;
+            min-height: 116px;
         }
 
         .hero-stat span {
@@ -261,8 +261,9 @@
         .hero-stat strong {
             color: var(--heading);
             display: block;
-            font-size: 1.6rem;
+            font-size: clamp(1.1rem, 2.3vw, 1.45rem);
             line-height: 1.1;
+            overflow-wrap: anywhere;
         }
 
         .hero-stat small {
@@ -273,7 +274,7 @@
 
         .card {
             background: var(--surface);
-            border: 1px solid rgba(255, 255, 255, 0.58);
+            border: 1px solid var(--border);
             border-radius: var(--radius);
             box-shadow: var(--shadow);
             margin-bottom: 1.5rem;
@@ -307,11 +308,11 @@
         }
 
         .grid-2 {
-            grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(min(100%, 360px), 1fr));
         }
 
         .grid-3 {
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
         }
 
         .summary-strip {
@@ -322,9 +323,9 @@
         }
 
         .summary-tile {
-            background: linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(248, 252, 253, 0.94));
+            background: linear-gradient(180deg, rgba(35, 43, 48, 0.96), rgba(21, 26, 30, 0.96));
             border: 1px solid var(--border);
-            border-radius: 16px;
+            border-radius: var(--radius);
             min-height: 122px;
             padding: 1rem;
         }
@@ -353,7 +354,7 @@
         .chart-grid {
             display: grid;
             gap: 1.25rem;
-            grid-template-columns: minmax(0, 1.8fr) minmax(280px, 1fr);
+            grid-template-columns: minmax(0, 1.65fr) minmax(300px, 1fr);
         }
 
         .chart-card {
@@ -382,16 +383,18 @@
 
         .table-wrap {
             overflow-x: auto;
+            scrollbar-color: var(--border-strong) transparent;
         }
 
         table {
             border-collapse: collapse;
+            min-width: 680px;
             width: 100%;
         }
 
         th,
         td {
-            border-bottom: 1px solid #e4edf0;
+            border-bottom: 1px solid var(--border);
             padding: 0.95rem 0.85rem;
             text-align: left;
             vertical-align: middle;
@@ -406,7 +409,7 @@
         }
 
         tbody tr:hover {
-            background: rgba(15, 124, 130, 0.04);
+            background: rgba(73, 182, 194, 0.08);
         }
 
         .metric {
@@ -441,7 +444,7 @@
         .btn {
             align-items: center;
             border: none;
-            border-radius: 999px;
+            border-radius: var(--radius-sm);
             cursor: pointer;
             display: inline-flex;
             font-size: 0.94rem;
@@ -468,7 +471,7 @@
         }
 
         .btn-secondary {
-            background: #edf4f6;
+            background: rgba(255, 255, 255, 0.08);
             border: 1px solid var(--border);
             color: var(--heading);
         }
@@ -534,9 +537,9 @@
 
         .form-group input,
         .form-group select {
-            background: #fbfdfe;
+            background: rgba(10, 13, 15, 0.72);
             border: 1px solid var(--border);
-            border-radius: 12px;
+            border-radius: var(--radius-sm);
             color: var(--heading);
             font-size: 0.95rem;
             min-height: 46px;
@@ -553,10 +556,10 @@
 
         .weather-card {
             background:
-                linear-gradient(135deg, rgba(15, 124, 130, 0.08), rgba(242, 153, 74, 0.08)),
-                #ffffff;
+                linear-gradient(135deg, rgba(73, 182, 194, 0.14), rgba(242, 166, 90, 0.12)),
+                var(--surface-strong);
             border: 1px solid var(--border);
-            border-radius: 22px;
+            border-radius: var(--radius);
             padding: 1.8rem;
             text-align: center;
         }
@@ -582,9 +585,9 @@
         }
 
         .stat {
-            background: rgba(255, 255, 255, 0.78);
+            background: rgba(255, 255, 255, 0.06);
             border: 1px solid var(--border);
-            border-radius: 16px;
+            border-radius: var(--radius);
             padding: 0.9rem 0.8rem;
         }
 
@@ -601,7 +604,7 @@
         }
 
         .badge {
-            border-radius: 999px;
+            border-radius: var(--radius-sm);
             display: inline-block;
             font-size: 0.82rem;
             font-weight: 700;
@@ -626,9 +629,9 @@
         }
 
         .info-pill {
-            background: rgba(255, 255, 255, 0.86);
+            background: rgba(255, 255, 255, 0.08);
             border: 1px solid var(--border);
-            border-radius: 999px;
+            border-radius: var(--radius-sm);
             color: var(--text-muted);
             font-size: 0.84rem;
             padding: 0.45rem 0.8rem;
@@ -637,7 +640,7 @@
         .split-band {
             display: grid;
             gap: 1.25rem;
-            grid-template-columns: minmax(0, 1.15fr) minmax(300px, 0.85fr);
+            grid-template-columns: minmax(0, 1.15fr) minmax(min(100%, 300px), 0.85fr);
         }
 
         footer {
@@ -645,6 +648,19 @@
             font-size: 0.9rem;
             padding: 1rem 1.25rem 2.5rem;
             text-align: center;
+        }
+
+        .api-status {
+            border-color: rgba(73, 182, 194, 0.34);
+        }
+
+        .api-status.is-online {
+            background: linear-gradient(180deg, rgba(23, 75, 58, 0.88), rgba(20, 37, 35, 0.94));
+        }
+
+        .api-status.is-offline {
+            background: linear-gradient(180deg, rgba(96, 47, 43, 0.9), rgba(38, 25, 26, 0.94));
+            border-color: rgba(255, 107, 122, 0.36);
         }
 
         @media (max-width: 960px) {
@@ -678,7 +694,7 @@
             }
 
             .container {
-                padding: 1.3rem 1rem 2.5rem;
+                padding: 1rem 0.8rem 2.5rem;
             }
 
             .hero-panel,
@@ -693,6 +709,52 @@
             th,
             td {
                 padding: 0.8rem 0.7rem;
+            }
+        }
+
+        @media (max-width: 520px) {
+            .brand span {
+                display: none;
+            }
+
+            .nav-links {
+                display: grid;
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                width: 100%;
+            }
+
+            .nav-links a,
+            .hero-actions .btn,
+            .actions-row .btn,
+            .actions-row form,
+            .actions-row form .btn {
+                width: 100%;
+            }
+
+            .hero-actions,
+            .actions-row {
+                display: grid;
+                grid-template-columns: 1fr;
+                width: 100%;
+            }
+
+            .weather-photo-stack {
+                grid-template-columns: 1fr;
+            }
+
+            .chart-card {
+                min-height: 320px;
+            }
+
+            .chart-panel,
+            .chart-panel.chart-panel-sm {
+                height: 240px;
+            }
+
+            .summary-strip,
+            .form-grid,
+            .stats {
+                grid-template-columns: 1fr;
             }
         }
     </style>

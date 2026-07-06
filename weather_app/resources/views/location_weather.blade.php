@@ -35,7 +35,7 @@
             <strong>
                 {{ $latest && ($latest->latitude ?? null) !== null ? number_format((float) $latest->latitude, 4) . ', ' . number_format((float) $latest->longitude, 4) : 'Fetch Live to resolve' }}
             </strong>
-            <small>{{ $latest ? ($latest->source ?? 'Open-Meteo') : '—' }}</small>
+            <small>{{ $latest ? ($latest->source ?? 'Open-Meteo') : 'No source yet' }}</small>
         </div>
 
         <div class="hero-stat">
@@ -78,9 +78,18 @@
                     <div class="stat-value">{{ number_format($latest->precipitation, 1) }} mm</div>
                     <div class="stat-label">Rain</div>
                 </div>
+                @if($latest->predicted_temperature !== null)
+                    <div class="stat">
+                        <div class="stat-value">{{ number_format($latest->predicted_temperature, 1) }}C</div>
+                        <div class="stat-label">Model Prediction</div>
+                    </div>
+                @endif
             </div>
             <div class="info-pills">
                 <span class="info-pill">Updated {{ $latest->recorded_at->format('M d, Y H:i') }}</span>
+                @if($latest->observed_at)
+                    <span class="info-pill">Observed {{ $latest->observed_at->format('M d, Y H:i') }}</span>
+                @endif
                 <span class="badge {{ $latest->is_prediction ? 'badge-prediction' : 'badge-live' }}">
                     {{ $latest->is_prediction ? 'Prediction' : 'Live' }}
                 </span>
@@ -184,13 +193,13 @@
     const historyChart = @json($historyChart);
 
     const chartColors = {
-        temperature: '#d45a3d',
-        humidity: '#1976a2',
-        pressure: '#7aa6b5',
-        precipitation: '#0f7c82',
-        cloud: '#f29f58',
-        grid: '#dfeaed',
-        text: '#48626d'
+        temperature: '#ff8a65',
+        humidity: '#49b6c2',
+        pressure: '#a9c8d4',
+        precipitation: '#40c58d',
+        cloud: '#f2a65a',
+        grid: 'rgba(255, 255, 255, 0.08)',
+        text: '#d9e5e8'
     };
 
     Chart.defaults.color = chartColors.text;

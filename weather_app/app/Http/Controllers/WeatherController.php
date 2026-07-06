@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Location;
 use App\Models\WeatherData;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Support\Facades\Http;
@@ -15,11 +16,13 @@ class WeatherController extends Controller
 
     public function __construct()
     {
-        $this->pythonApiUrl = (string) config('services.weather_api.url', 'http://127.0.0.1:5000');
+        $this->pythonApiUrl = rtrim((string) config('services.weather_api.url', 'http://127.0.0.1:5000'), '/');
     }
 
     public function dashboard()
     {
+        $apiStatus = $this->apiStatus();
+
         $locations = Location::with('weatherData')
             ->withCount('weatherData')
             ->get();
@@ -58,7 +61,8 @@ class WeatherController extends Controller
             'locations',
             'recentPredictions',
             'predictionTrend',
-            'locationSummary'
+            'locationSummary',
+            'apiStatus'
         ));
     }
 
@@ -164,12 +168,17 @@ class WeatherController extends Controller
                 WeatherData::create([
                     'location_id' => $location->id,
                     'temperature' => $data['temperature'],
+                    'predicted_temperature' => $data['predicted_temperature'] ?? null,
                     'humidity' => $data['humidity'],
                     'pressure' => $data['pressure'],
                     'wind_speed' => $data['wind_speed'],
                     'precipitation' => $data['precipitation'],
                     'cloud_cover' => $data['cloud_cover'],
                     'month' => $data['month'],
+                    'latitude' => $data['latitude'] ?? null,
+                    'longitude' => $data['longitude'] ?? null,
+                    'source' => $data['source'] ?? 'Open-Meteo',
+                    'observed_at' => isset($data['observed_at']) ? Carbon::parse($data['observed_at']) : null,
                     'is_prediction' => false,
                     'recorded_at' => now(),
                 ]);
@@ -199,5 +208,28 @@ class WeatherController extends Controller
     private function pythonApiUnavailableMessage(): string
     {
         return "Weather API is not running. Start the Python service at {$this->pythonApiUrl} and try again.";
+    }
+
+    private function apiStatus(): array
+    {
+        try {
+            $response = Http::timeout(3)->get("{$this->pythonApiUrl}/health");
+
+            if ($response->successful()) {
+                return [
+                    'online' => true,
+                    'label' => 'Weather API online',
+                    'detail' => 'Predictions are connected at ' . $this->pythonApiUrl,
+                ];
+            }
+        } catch (\Throwable $e) {
+            Log::debug('Weather API health check failed: ' . $e->getMessage());
+        }
+
+        return [
+            'online' => false,
+            'label' => 'Weather API offline',
+            'detail' => 'Start the Python service at ' . $this->pythonApiUrl,
+        ];
     }
 }
