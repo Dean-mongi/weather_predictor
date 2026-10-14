@@ -31,8 +31,9 @@ Run the main script:
 ```bash
 python weather_predictor.py
 ```
-python -m pip install -r python_api\requirements.txt
-python -u python_api\weather_api.py
+ python -m pip install -r python_api\requirements.txt
+  python -u python_api\weather_api.py
+'''
 The script will:
 1. Generate synthetic weather data
 2. Train a Random Forest model
