@@ -19,6 +19,7 @@
         </p>
         <div class="hero-actions">
             <a href="{{ route('locations.index') }}" class="btn btn-secondary">Manage Locations</a>
+            <a href="{{ route('weather.map') }}" class="btn btn-secondary">Open Weather Map</a>
             <a href="#manual-prediction" class="btn btn-primary">Create Prediction</a>
         </div>
         <div class="dashboard-hero-media" aria-label="Satellite-inspired weather view">

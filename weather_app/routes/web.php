@@ -5,6 +5,8 @@ use App\Http\Controllers\WeatherController;
 use App\Http\Controllers\LocationController;
 
 Route::get('/', [WeatherController::class, 'dashboard'])->name('dashboard');
+Route::get('/map', [WeatherController::class, 'map'])->name('weather.map');
+Route::post('/map/predict', [WeatherController::class, 'predictFromMap'])->name('weather.map.predict');
 
 Route::get('/locations', [LocationController::class, 'index'])->name('locations.index');
 Route::post('/locations', [LocationController::class, 'store'])->name('locations.store');

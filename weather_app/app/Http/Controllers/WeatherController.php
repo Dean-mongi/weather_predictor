@@ -28,7 +28,10 @@ class WeatherController extends Controller
             ->get();
 
         $recentPredictions = WeatherData::with('location')
-            ->where('is_prediction', true)
+            ->where(function ($query) {
+                $query->where('is_prediction', true)
+                    ->orWhereNotNull('predicted_temperature');
+            })
             ->latest('recorded_at')
             ->take(10)
             ->get();
@@ -39,7 +42,7 @@ class WeatherController extends Controller
             ->map(fn (WeatherData $prediction) => [
                 'label' => $prediction->recorded_at->format('M d, H:i'),
                 'location' => $prediction->location?->name ?? 'Unknown',
-                'temperature' => (float) $prediction->temperature,
+                'temperature' => (float) ($prediction->predicted_temperature ?? $prediction->temperature),
                 'humidity' => (float) $prediction->humidity,
                 'pressure' => (float) $prediction->pressure,
                 'wind_speed' => (float) $prediction->wind_speed,
@@ -64,6 +67,90 @@ class WeatherController extends Controller
             'locationSummary',
             'apiStatus'
         ));
+    }
+
+    public function map()
+    {
+        $locations = Location::whereNotNull('latitude')
+            ->whereNotNull('longitude')
+            ->withCount('weatherData')
+            ->get();
+
+        return view('weather_map', compact('locations'));
+    }
+
+    public function predictFromMap(Request $request)
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'country' => 'nullable|string|max:255',
+            'latitude' => 'required|numeric|between:-90,90',
+            'longitude' => 'required|numeric|between:-180,180',
+        ]);
+
+        $latitude = (float) $validated['latitude'];
+        $longitude = (float) $validated['longitude'];
+
+        try {
+            $response = Http::timeout(20)->get("{$this->pythonApiUrl}/fetch-weather", [
+                'location' => $validated['name'],
+                'country' => $validated['country'] ?? '',
+                'latitude' => $latitude,
+                'longitude' => $longitude,
+            ]);
+
+            if (! $response->successful()) {
+                return back()->withInput()->with('error', $response->json('error') ?: 'Could not fetch weather for this map point.');
+            }
+
+            $data = $response->json();
+            $location = Location::whereBetween('latitude', [$latitude - 0.00001, $latitude + 0.00001])
+                ->whereBetween('longitude', [$longitude - 0.00001, $longitude + 0.00001])
+                ->first();
+
+            if ($location) {
+                $location->update([
+                    'name' => $validated['name'],
+                    'country' => $validated['country'] ?? $location->country,
+                    'latitude' => $latitude,
+                    'longitude' => $longitude,
+                ]);
+            } else {
+                $location = Location::create([
+                    'name' => $validated['name'],
+                    'country' => $validated['country'] ?? null,
+                    'latitude' => $latitude,
+                    'longitude' => $longitude,
+                ]);
+            }
+
+            WeatherData::create([
+                'location_id' => $location->id,
+                'temperature' => $data['temperature'],
+                'predicted_temperature' => $data['predicted_temperature'] ?? null,
+                'humidity' => $data['humidity'],
+                'pressure' => $data['pressure'],
+                'wind_speed' => $data['wind_speed'],
+                'precipitation' => $data['precipitation'],
+                'cloud_cover' => $data['cloud_cover'],
+                'month' => $data['month'],
+                'latitude' => $data['latitude'] ?? $latitude,
+                'longitude' => $data['longitude'] ?? $longitude,
+                'source' => $data['source'] ?? 'Open-Meteo',
+                'observed_at' => isset($data['observed_at']) ? Carbon::parse($data['observed_at']) : null,
+                'is_prediction' => false,
+                'recorded_at' => now(),
+            ]);
+
+            return redirect()->route('weather.location', $location)
+                ->with('success', 'Live conditions and a model prediction were saved for this map point.');
+        } catch (ConnectionException $e) {
+            Log::error('Map weather connection error: ' . $e->getMessage());
+            return back()->withInput()->with('error', $this->pythonApiUnavailableMessage());
+        } catch (\Throwable $e) {
+            Log::error('Map weather error: ' . $e->getMessage());
+            return back()->withInput()->with('error', 'Could not create a prediction for this map point. Please try again.');
+        }
     }
 
     public function locationWeather(Location $location)

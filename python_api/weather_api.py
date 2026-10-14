@@ -246,22 +246,46 @@ def health():
 @app.route('/predict', methods=['POST'])
 def predict():
     try:
-        data = request.get_json()
+        data = request.get_json(silent=True)
         required_fields = ['humidity', 'pressure', 'wind_speed', 'precipitation', 'cloud_cover', 'month']
+
+        if not isinstance(data, dict):
+            return jsonify({'error': 'Request body must be a JSON object.'}), 400
 
         for field in required_fields:
             if field not in data:
                 return jsonify({'error': f'Missing field: {field}'}), 400
 
+        try:
+            features = {
+                'humidity': float(data['humidity']),
+                'pressure': float(data['pressure']),
+                'wind_speed': float(data['wind_speed']),
+                'precipitation': float(data['precipitation']),
+                'cloud_cover': float(data['cloud_cover']),
+                'month': int(data['month']),
+            }
+        except (TypeError, ValueError, OverflowError):
+            return jsonify({'error': 'All weather fields must contain valid numbers.'}), 400
+
+        if not all(np.isfinite(value) for value in features.values()):
+            return jsonify({'error': 'Weather fields must be finite numbers.'}), 400
+
+        bounds = {
+            'humidity': (0, 100),
+            'pressure': (900, 1100),
+            'wind_speed': (0, 200),
+            'precipitation': (0, None),
+            'cloud_cover': (0, 100),
+            'month': (1, 12),
+        }
+        for field, (minimum, maximum) in bounds.items():
+            value = features[field]
+            if value < minimum or (maximum is not None and value > maximum):
+                return jsonify({'error': f'{field} must be between {minimum} and {maximum or "no upper limit"}.'}), 400
+
         model = get_or_create_model()
-        input_df = pd.DataFrame([{
-            'humidity': float(data['humidity']),
-            'pressure': float(data['pressure']),
-            'wind_speed': float(data['wind_speed']),
-            'precipitation': float(data['precipitation']),
-            'cloud_cover': float(data['cloud_cover']),
-            'month': int(data['month'])
-        }])
+        input_df = pd.DataFrame([features])
 
         prediction = model.predict(input_df)[0]
 
@@ -308,8 +332,11 @@ def fetch_weather():
 
 @app.route('/train', methods=['POST'])
 def train():
+    global model_cache
+
     try:
         metrics, feature_importance = train_and_save_model()
+        model_cache = load_model()
         return jsonify({
             'message': 'Model trained successfully',
             'metrics': metrics,

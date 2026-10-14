@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@yield('title', 'Weather Predictor')</title>
+    @yield('head')
     <style>
         :root {
             --bg: #111518;
@@ -769,6 +770,7 @@
                 </a>
                 <div class="nav-links">
                     <a href="{{ route('dashboard') }}" class="{{ request()->routeIs('dashboard') ? 'active' : '' }}">Dashboard</a>
+                    <a href="{{ route('weather.map') }}" class="{{ request()->routeIs('weather.map*') ? 'active' : '' }}">Weather Map</a>
                     <a href="{{ route('locations.index') }}" class="{{ request()->routeIs('locations.*') ? 'active' : '' }}">Locations</a>
                 </div>
             </div>
