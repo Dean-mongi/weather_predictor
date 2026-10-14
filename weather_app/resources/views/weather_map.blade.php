@@ -74,14 +74,7 @@
 @section('scripts')
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 <script>
-    const savedLocations = @json($locations->map(fn ($location) => [
-        'name' => $location->name,
-        'country' => $location->country,
-        'latitude' => (float) $location->latitude,
-        'longitude' => (float) $location->longitude,
-        'url' => route('weather.location', $location),
-        'count' => $location->weather_data_count,
-    ])->values());
+    const savedLocations = @json($savedLocations);
     const map = L.map('weather-map').setView([-1.2864, 36.8172], 5);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         maxZoom: 19,

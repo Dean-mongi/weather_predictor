@@ -76,7 +76,16 @@ class WeatherController extends Controller
             ->withCount('weatherData')
             ->get();
 
-        return view('weather_map', compact('locations'));
+        $savedLocations = $locations->map(fn (Location $location) => [
+            'name' => $location->name,
+            'country' => $location->country,
+            'latitude' => (float) $location->latitude,
+            'longitude' => (float) $location->longitude,
+            'url' => route('weather.location', $location),
+            'count' => $location->weather_data_count,
+        ])->values();
+
+        return view('weather_map', compact('locations', 'savedLocations'));
     }
 
     public function predictFromMap(Request $request)
